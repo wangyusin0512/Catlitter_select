@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>貓砂產品規格選擇表</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#252525;background:#f6f7f5}
+*{box-sizing:border-box}body{margin:0;padding:24px 14px}.wrap{max-width:720px;margin:auto}
+header{margin:8px 0 20px}h1{font-size:25px;margin:0 0 8px}p{color:#666;line-height:1.6}
+.card{background:#fff;border:1px solid #e5e7e3;border-radius:16px;padding:20px;margin:14px 0}
+h2{font-size:17px;margin:0 0 14px}.options{display:grid;gap:10px}
+label.opt{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid #e5e7e3;border-radius:10px;cursor:pointer}
+input{accent-color:#466b56}select,textarea{width:100%;padding:12px;border:1px solid #d8ddd6;border-radius:10px;font:inherit;background:#fff}
+textarea{min-height:90px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{border:0;border-radius:10px;padding:13px 16px;font:inherit;font-weight:650;cursor:pointer}
+.primary{background:#315c45;color:white;width:100%}.secondary{background:#eef1ed;color:#26352b;width:100%;margin-top:10px}
+.result{background:#f3f6f2;border-radius:12px;padding:15px;margin-top:16px;display:none}
+table{width:100%;border-collapse:collapse}td{padding:9px 5px;border-bottom:1px solid #dfe5dd;vertical-align:top}td:first-child{color:#667067;width:38%}
+small{color:#777}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.card{padding:16px}}
+</style>
+</head>
+<body><main class="wrap">
+<header><h1>貓砂產品規格選擇表</h1><p>選擇產品系列與規格，完成後可產生並複製產品規格確認單。</p></header>
+<section class="card">
+<h2>1. 產品系列</h2>
+<div class="options" id="types">
+<label class="opt"><input type="radio" name="type" value="經典水晶貓砂" checked>經典水晶貓砂</label>
+<label class="opt"><input type="radio" name="type" value="結團貓砂">結團貓砂</label>
+<label class="opt"><input type="radio" name="type" value="健康指示劑貓砂">健康指示劑貓砂</label>
+<label class="opt"><input type="radio" name="type" value="隱血檢測貓砂">隱血檢測貓砂</label>
+</div></section>
+<section class="card"><h2>2. 粒徑</h2><select id="size"></select></section>
+<section class="card"><h2>3. 香味</h2><div id="scentOptions" class="options"></div><small id="scentNA"></small></section>
+<section class="card"><h2>4. 彩色顆粒</h2><div id="colorOptions" class="options"></div><small id="colorNA"></small></section>
+<section class="card"><h2>5. 結團性</h2><div id="clumpOptions" class="options"></div></section>
+<section class="card"><h2>6. 彩膠添加比例</h2><div id="gelOptions" class="options"></div></section>
+<section class="card"><h2>7. 其他客製化需求</h2><textarea id="notes" placeholder="例如：包裝重量、特殊香味／顏色或 OEM／ODM 需求"></textarea></section>
+<section class="card"><button class="primary" id="generate">產生產品規格確認單</button><div class="result" id="result"></div><button class="secondary" id="copy" style="display:none">複製確認單</button></section>
+<p><small>規格依提供的產品表整理。結團貓砂的彩色顆粒選項暫依經典水晶貓砂顏色清單呈現，請於正式下單前確認。</small></p>
+</main>
+<script>
+const sizesClassic=["A. 0.5–2mm","B. 1–8mm","C. 1–6mm","D. 1–4mm","E. 4–8mm"];
+const scents=["無香","薰衣草","海洋","蘆薈","檸檬","玫瑰","其他／客製"];
+const colors=["透明","薰衣草紫","海洋藍","蘆薈綠","檸檬黃","玫瑰紅","其他／客製"];
+const gels=["3%","5%","10%","30%"];
+const $=id=>document.getElementById(id);
+const getType=()=>document.querySelector('input[name="type"]:checked').value;
+function radios(container,items,name,selected){$(container).innerHTML=items.map((v,i)=>`<label class="opt"><input type="radio" name="${name}" value="${v}" ${v===selected?'checked':''}>${v}</label>`).join('')}
+function checked(name){return document.querySelector(`input[name="${name}"]:checked`)?.value||""}
+function update(){
+ const t=getType(),basic=t==="經典水晶貓砂"||t==="結團貓砂";
+ const sz=t==="經典水晶貓砂"?sizesClassic:["0.5–2mm"];
+ $('size').innerHTML=sz.map(x=>`<option>${x}</option>`).join('');
+ radios('scentOptions',basic?scents:[],'scent','無香');$('scentNA').textContent=basic?'':'此系列不提供香味選擇。';
+ radios('colorOptions',basic?colors:[],'color','透明');$('colorNA').textContent=basic?'':'此系列不提供彩色顆粒選擇。';
+ const cl=t==="經典水晶貓砂"?["不結團"]:t==="結團貓砂"?["結團"]:t==="健康指示劑貓砂"?["結團","不結團"]:[];
+ radios('clumpOptions',cl,'clump',cl[0]||'');
+ radios('gelOptions',basic?gels:[],'gel','3%');
+ $('result').style.display='none';$('copy').style.display='none';
+}
+document.querySelectorAll('input[name="type"]').forEach(x=>x.addEventListener('change',update));
+update();
+function selection(){
+ const t=getType(),basic=t==="經典水晶貓砂"||t==="結團貓砂";
+ return [
+ ['產品系列',t],['主要基材','二氧化矽 SiO₂'],['粒徑',$('size').value],
+ ['香味',basic?checked('scent'):'不適用'],['彩色顆粒',basic?checked('color'):'不適用'],
+ ['結團性',checked('clump')||'不適用'],['彩膠添加比例',basic?checked('gel'):'不適用'],
+ ['OEM／ODM','支援'],['其他需求',$('notes').value.trim()||'無']
+ ];
+}
+$('generate').onclick=()=>{
+ const rows=selection();$('result').innerHTML='<h2>產品規格確認單</h2><table>'+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1].replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</td></tr>`).join('')+'</table>';
+ $('result').style.display='block';$('copy').style.display='block';
+};
+$('copy').onclick=async()=>{
+ const txt='產品規格確認單\n'+selection().map(r=>r[0]+'：'+r[1]).join('\n');
+ try{await navigator.clipboard.writeText(txt);$('copy').textContent='已複製！';setTimeout(()=>$('copy').textContent='複製確認單',1800)}
+ catch(e){prompt('請複製以下內容',txt)}
+};
+</script></body></html>
